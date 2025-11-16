@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beautiful Weather — Modern UI</title>
+  <style>
+    /* My Refined Colors & Styles */
+    :root{
+      --bg-light: linear-gradient(135deg, #f7f0e8, #e0d9cf); /* Softer, warmer body background */
+      --bg-card: rgba(255, 255, 255, 0.9); /* Slightly more opaque white card */
+      --bg-card-gradient: linear-gradient(180deg, #ffffff, #fcfcfc);
+      --border-card: #e8e0d5; /* Softer card border */
+      --shadow-card: rgba(180, 160, 140, 0.15); /* Softer shadow */
+
+      --accent-main: linear-gradient(90deg, #6dd5ed, #2193b0); /* Fresh blue gradient for buttons */
+      --accent-secondary: linear-gradient(135deg, #a7e9af, #63d471); /* Green for chips */
+
+      --text-dark: #3a4750; /* Darker text for readability on light background */
+      --text-muted: #8c98a5; /* Softer muted text */
+      --text-light: #ffffff; /* For elements on dark backgrounds */
+
+      --glass-input: rgba(0, 0, 0, 0.04); /* Very light background for inputs */
+      --border-input: rgba(0, 0, 0, 0.08);
+
+      --error-bg: rgba(255, 99, 71, 0.1); /* Softened error background */
+      --error-text: #d9534f; /* Softened error text */
+    }
+
+    /* Original dark theme variables (preserved for easy dark mode toggle) */
+    .dark-mode { /* Example class if you want to implement a theme toggle later */
+      --bg1: #0f172a; /* dark */
+      --accent1: linear-gradient(135deg,#ffd86f,#ff6b6b);
+      --glass: rgba(255,255,255,0.08);
+      --glass-strong: rgba(255,255,255,0.12);
+      --text: #e6eef8;
+      --muted: #c8d6ea;
+    }
+
+
+    /* Global Reset & Base Styles */
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; font-family:'Inter', 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg-light); /* Using new lighter background */
+      color: var(--text-dark); /* Using new darker text */
+      display:flex; align-items:center; justify-content:center; padding:28px;
+      transition: background 600ms ease, color 600ms ease;
+    }
+
+    /* Container */
+    .app{
+      width:100%; max-width:980px; display:grid; grid-template-columns: 420px 1fr; gap:28px; align-items:start;
+    }
+
+    /* Left card */
+    .card{
+      background: var(--bg-card-gradient); /* Softer white gradient */
+      border-radius:18px; padding:22px; backdrop-filter: blur(18px);
+      border:1px solid var(--border-card); /* Softer border */
+      box-shadow: 0 15px 30px var(--shadow-card); /* Softer shadow */
+      position:relative; overflow:hidden;
+    }
+
+    /* Top controls */
+    .controls{display:flex; gap:12px; align-items:center}
+    .title{flex:1}
+    h1{font-size:20px; margin:0; color: var(--text-dark);} /* Use darker text */
+    .theme-toggle{
+      background: rgba(0,0,0,0.05); /* Soft background for toggle */
+      border:1px solid rgba(0,0,0,0.1);
+      padding:8px 10px; border-radius:10px; color:var(--text-muted); cursor:pointer;
+      font-weight: 500;
+    }
+
+    /* Search */
+    form.search{display:flex; gap:10px; margin-top:18px}
+    .input{
+      flex:1; padding:12px 14px; border-radius:12px; border:1px solid var(--border-input); /* Subtle border */
+      outline:none; font-size:14px;
+      background: var(--glass-input); /* Very light background */
+      color: var(--text-dark); /* Darker text in input */
+    }
+    .input::placeholder { color: var(--text-muted); opacity: 0.8; } /* Softer placeholder */
+
+    .btn{
+      padding:12px 16px; border-radius:12px; border:none; cursor:pointer;
+      background: var(--accent-main); /* New fresh blue gradient */
+      color: var(--text-light); /* White text on blue button */
+      font-weight:700;
+      box-shadow: 0 5px 15px rgba(33, 147, 176, 0.3); /* Shadow matching accent */
+    }
+
+    /* Main weather display */
+    .main-weather{display:flex; gap:18px; align-items:center; margin-top:18px}
+    .icon-wrap{
+      width:140px;height:140px;display:flex;align-items:center;justify-content:center;
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01)); /* Subtle glass effect */
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05); /* Light shadow for icon wrap */
+    }
+    .temp{font-size:48px; font-weight:700; color: var(--text-dark);} /* Darker temp text */
+    .meta{color:var(--text-muted); margin-top:6px} /* Use new muted text */
+
+    /* Details row */
+    .details{display:flex; gap:12px; margin-top:18px}
+    .chip{
+      flex:1;
+      background: rgba(0,0,0,0.03); /* Subtle background for chips */
+      padding:12px; border-radius:12px; text-align:center;
+      border: 1px solid rgba(0,0,0,0.08); /* Light border */
+      color: var(--text-dark); /* Darker text for chip values */
+    }
+    .chip .k{color:var(--text-muted); font-size:13px} /* Muted text for key */
+    .chip .v{font-weight:700; margin-top:6px}
+
+    /* Right column: forecast + extras */
+    .right{
+      display:flex; flex-direction:column; gap:18px;
+    }
+    .forecast{display:flex; gap:12px; overflow:auto; padding-bottom:6px}
+    .day{
+      min-width:110px;
+      background: rgba(0,0,0,0.03); /* Subtle background for forecast days */
+      border: 1px solid rgba(0,0,0,0.08); /* Light border */
+      padding:12px; border-radius:12px; text-align:center;
+      color: var(--text-dark); /* Darker text for forecast */
+    }
+    .day .d{font-weight:600}
+    .extras{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+
+    /* Animations: sun/cloud/rain */
+    .sun{
+      width:90px;height:90px;border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fffde7 0%, #ffeb3b 30%, #fbc02d 60%); /* Brighter, warmer sun */
+      box-shadow: 0 8px 30px rgba(251, 192, 45, 0.3); /* Shadow matching brighter sun */
+      animation:spin 18s linear infinite;
+    }
+    @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+
+    .cloud-svg{width:110px;height:70px; opacity:0.95}
+    .cloud-svg g path{fill: #cccccc;} /* Lighter clouds */
+    .cloud-svg g ellipse{fill: #70b4f0;} /* Slightly darker raindrops for contrast */
+
+    .raindrop{animation:fall 1s linear infinite}
+    @keyframes fall{0%{transform:translateY(-6px);opacity:0}50%{opacity:1}100%{transform:translateY(10px);opacity:0}}
+
+    /* Dynamic backgrounds per weather (class on body) */
+    body.weather-clear{background: linear-gradient(180deg, #87ceeb, #a2d2ff);} /* Softer blue skies */
+    body.weather-clouds{background: linear-gradient(180deg, #cfd8dc, #eceff1);} /* Muted gray/white for clouds */
+    body.weather-rain{background: linear-gradient(180deg, #90a4ae, #b0bec5);} /* Deeper gray-blue for rain */
+    body.weather-snow{background: linear-gradient(180deg, #e0e7ea, #ffffff);} /* Very light, almost white for snow */
+    body.weather-storm{background: linear-gradient(180deg, #607d8b, #455a64);} /* Darker, brooding grays for storms */
+
+    /* small screens */
+    @media(max-width:920px){.app{grid-template-columns:1fr;}.right{order:2}.card{order:1}}
+
+    /* subtle transitions */
+    .card, .day, .chip, .input, .btn, .theme-toggle{transition:all 260ms cubic-bezier(.2,.8,.2,1)}
+
+    /* error */
+    .error{
+      color: var(--error-text);
+      background: var(--error-bg);
+      padding:10px;border-radius:10px;margin-top:12px;
+    }
+  </style>
+</head>
+<body class="weather-clear">
+
+  <div class="app">
+    <div class="card">
+      <div class="controls">
+        <div class="title"><h1>Weather — Advanced UI</h1><div class="meta">Quick & beautiful — powered by OpenWeather</div></div>
+        <button class="theme-toggle" id="themeToggle">Toggle</button>
+      </div>
+
+      <form method="POST" class="search" id="searchForm">
+        <input class="input" type="text" name="city" placeholder="Enter city or zip" required />
+        <button class="btn" type="submit">Search</button>
+      </form>
+
+      <div class="main-weather" id="mainWeather" data-weather="{{ weather.description if weather else '' }}">
+        <div class="icon-wrap" id="iconWrap">
+          {% if weather and 'rain' in weather.description|lower %}
+            <svg class="cloud-svg" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">
+              <g fill="#ffffff">
+                <path d="M20 10a8 8 0 0 0-8 8h32a8 8 0 0 0 0-16c-1.2 0-2.3.2-3.3.6A12 12 0 0 0 20 10z" opacity="0.95"/>
+              </g>
+              <g fill="#9ad0ff">
+                <ellipse cx="22" cy="36" rx="2.8" ry="4" class="raindrop"/>
+                <ellipse cx="30" cy="36" rx="2.8" ry="4" class="raindrop" style="animation-delay:0.2s"/>
+                <ellipse cx="38" cy="36" rx="2.8" ry="4" class="raindrop" style="animation-delay:0.4s"/>
+              </g>
+            </svg>
+          {% elif weather and 'cloud' in weather.description|lower %}
+            <svg class="cloud-svg" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">
+              <g fill="#ffffff">
+                <path d="M20 10a8 8 0 0 0-8 8h32a8 8 0 0 0 0-16c-1.2 0-2.3.2-3.3.6A12 12 0 0 0 20 10z" opacity="0.98"/>
+              </g>
+            </svg>
+          {% elif weather and ('snow' in weather.description|lower or 'sleet' in weather.description|lower) %}
+            <svg class="cloud-svg" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">
+              <g fill="#ffffff">
+                <path d="M20 10a8 8 0 0 0-8 8h32a8 8 0 0 0 0-16c-1.2 0-2.3.2-3.3.6A12 12 0 0 0 20 10z"/>
+              </g>
+              <g fill="#e6f7ff">
+                <text x="18" y="38" font-size="14">❄</text>
+                <text x="32" y="38" font-size="14">❄</text>
+              </g>
+            </svg>
+          {% else %}
+            <div class="sun" aria-hidden="true"></div>
+          {% endif %}
+        </div>
+
+        <div style="flex:1;text-align:left">
+          {% if weather %}
+            <div style="display:flex;align-items:center;gap:12px;justify-content:space-between">
+              <div>
+                <div style="font-size:14px;color:var(--text-muted)">Now in</div>
+                <div style="font-size:20px;font-weight:700">{{ weather.city }}</div>
+                <div class="meta">{{ weather.description }}</div>
+              </div>
+              <div style="text-align:right">
+                <div class="temp">{{ weather.temperature }}°C</div>
+                <div style="color:var(--text-muted)">Feels like {{ weather.feels_like }}°C</div>
+              </div>
+            </div>
+          {% else %}
+            <div style="font-size:16px;color:var(--text-muted)">Search a city to see the current weather with animated icons, forecast and details.</div>
+          {% endif %}
+
+          {% if weather %}
+          <div class="details">
+            <div class="chip"><div class="k">Wind</div><div class="v">{{ weather.wind }} m/s</div></div>
+            <div class="chip"><div class="k">Humidity</div><div class="v">{{ weather.humidity }}%</div></div>
+            <div class="chip"><div class="k">Pressure</div><div class="v">{{ weather.pressure }} hPa</div></div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+
+    </div>
+
+    <div class="right">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:700">5-Day Forecast</div>
+          <div style="color:var(--text-muted);font-size:13px">Local Time</div>
+        </div>
+
+        <div class="forecast">
+          {% if forecast %}
+            {% for day in forecast %}
+            <div class="day">
+              <div class="d">{{ day.day }}</div>
+              <div style="margin:8px 0"><img src="http://openweathermap.org/img/wn/{{ day.icon }}@2x.png" alt="" style="width:56px"/></div>
+              <div style="font-weight:700">{{ day.temp }}°C</div>
+              <div style="color:var(--text-muted);font-size:13px">{{ day.desc }}</div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div style="color:var(--text-muted)">No forecast loaded — search a city.</div>
+          {% endif %}
+        </div>
+
+        <div style="margin-top:12px;color:var(--text-muted);font-size:13px">Tip: Click the temperature for Celsius/Fahrenheit toggle (coming soon)</div>
+      </div>
+
+      <div class="card extras">
+        <div style="text-align:center"><div style="font-weight:700">Sunrise</div><div style="color:var(--text-muted);margin-top:6px">{% if weather %}{{ weather.sunrise }}{% else %}-{% endif %}</div></div>
+        <div style="text-align:center"><div style="font-weight:700">Sunset</div><div style="color:var(--text-muted);margin-top:6px">{% if weather %}{{ weather.sunset }}{% else %}-{% endif %}</div></div>
+        <div style="text-align:center"><div style="font-weight:700">UV Index</div><div style="color:var(--text-muted);margin-top:6px">{% if weather and weather.uvi %}{{ weather.uvi }}{% else %}-{% endif %}</div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme toggle (now applies a simple filter for visual change on "toggle")
+    const body = document.body;
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('click', ()=>{
+      // This is a simple visual toggle. For a true dark mode, you'd swap CSS classes.
+      if(body.style.filter) { body.style.filter = ''; } else { body.style.filter = 'brightness(0.9)'; }
+    });
+
+    // Dynamic background based on server-side weather description
+    (function(){
+      const mw = document.getElementById('mainWeather');
+      if(!mw) return;
+      const desc = (mw.dataset.weather || '').toLowerCase();
+      if(desc.includes('cloud')) document.body.className = 'weather-clouds';
+      else if(desc.includes('rain') || desc.includes('drizzle')) document.body.className = 'weather-rain';
+      else if(desc.includes('snow') || desc.includes('sleet')) document.body.className = 'weather-snow';
+      else if(desc.includes('storm') || desc.includes('thunder')) document.body.className = 'weather-storm';
+      else document.body.className = 'weather-clear';
+    })();
+
+    // small accessibility: prevent double submit
+    document.getElementById('searchForm').addEventListener('submit', function(){
+      const btn = this.querySelector('button[type="submit"]'); btn.disabled=true; btn.textContent='Searching...';
+    });
+  </script>
+</body>
+</html>
